@@ -35,14 +35,15 @@ jobs:
         id: results
         run: |
           cd blackduck-security-task
-          OUTPUT=$(npx nyc --reporter=html --reporter=text --reporter=json-summary \
-            mocha --require ts-node/register test/unit/**/*.spec.ts test/unit/*.spec.ts | tee test-output.txt)
-      
+          npx mocha --reporter=html --reporter=json-summary-reporter \
+            --require ts-node/register \
+            "test/unit/**/*.spec.ts" "test/unit/.spec.ts"
+       
+          echo "passed=$(jq '.stats.passes' test.json)" >> $GITHUB_OUTPUT
+          echo "failed=$(jq '.stats.failures' test.json)" >> $GITHUB_OUTPUT
+          echo "total=$(jq '.stats.tests' test.json)" >> $GITHUB_OUTPUT
           echo "lines=$(jq '.total.lines.pct' coverage/coverage-summary.json)" >> $GITHUB_OUTPUT
-          echo "passed=$(echo "$OUTPUT" | grep -oP '\d+(?= passing)' | tail -1)" >> $GITHUB_OUTPUT
-          echo "failed=$(echo "$OUTPUT" | grep -oP '\d+(?= failing)' | tail -1)" >> $GITHUB_OUTPUT
-          echo "total=$(( $(echo "$OUTPUT" | grep -oP '\d+(?= passing)' | tail -1) + $(echo "$OUTPUT" | grep -oP '\d+(?= failing)' | tail -1) ))" >> $GITHUB_OUTPUT
-
+    
       - name: Comment results on PR
         run: |
           PR=$(jq -r .pull_request.number $GITHUB_EVENT_PATH)
