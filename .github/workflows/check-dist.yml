@@ -37,7 +37,8 @@ jobs:
           cd blackduck-security-task
           npx nyc --reporter=json-summary \
             mocha --reporter json --require ts-node/register \
-            "test/unit/**/*.spec.ts" "test/unit/.spec.ts" > test.json
+            "test/unit/**/*.spec.ts" "test/unit/*.spec.ts" > test.json
+      
           echo "passed=$(jq -r '.stats.passes' test.json)" >> $GITHUB_OUTPUT
           echo "failed=$(jq -r '.stats.failures' test.json)" >> $GITHUB_OUTPUT
           echo "total=$(jq -r '.stats.tests' test.json)" >> $GITHUB_OUTPUT
