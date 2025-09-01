@@ -35,22 +35,8 @@ jobs:
         id: results
         run: |
           cd blackduck-security-task
-      
-          # Run tests and capture JSON output
-          npx mocha --reporter json --require ts-node/register \
-            "test/unit/**/*.spec.ts" "test/unit/*.spec.ts" > test.json
-      
-          # Run coverage separately
-          npx nyc --reporter=json-summary \
-            mocha --require ts-node/register \
-            "test/unit/**/*.spec.ts" "test/unit/*.spec.ts"
-      
-          # Extract test stats
-          echo "passed=$(jq -r '.stats.passes' test.json)" >> $GITHUB_OUTPUT
-          echo "failed=$(jq -r '.stats.failures' test.json)" >> $GITHUB_OUTPUT
-          echo "total=$(jq -r '.stats.tests' test.json)" >> $GITHUB_OUTPUT
-      
-          # Extract coverage
+          npx nyc --reporter=json-summary mocha --reporter json --require ts-node/register "test/unit/**/*.spec.ts" > test.json 2> mocha.log
+          for k in passes failures tests; do echo "$k=$(sed -n '/^{/,$p' test.json | jq -r ".stats.$k")" >> $GITHUB_OUTPUT; done
           echo "lines=$(jq -r '.total.lines.pct' coverage/coverage-summary.json)" >> $GITHUB_OUTPUT
  
       - name: Comment results on PR
