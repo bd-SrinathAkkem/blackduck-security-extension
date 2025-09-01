@@ -51,7 +51,7 @@ jobs:
           } > coverage-table.md
           BODY="## 🧪 Test & Coverage Results
 
-          ![ Tests ](https://img.shields.io/badge/tests-${{ steps.results.outputs.passed }}_passed_${{ steps.results.outputs.failed }}_failed-blue)
+          ![ Tests ](https://img.shields.io/badge/tests-${{ steps.results.outputs.passes }}_passed_${{ steps.results.outputs.failures }}_failed-blue)
           ![Coverage](https://img.shields.io/badge/coverage-${LINES}%25-brightgreen)
 
           <details>
