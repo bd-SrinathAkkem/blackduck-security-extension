@@ -34,12 +34,17 @@ jobs:
       - name: Run tests and collect results
         id: results
         run: |
-          cd blackduck-security-task && npm install --no-save mocha-json
-          npx nyc --reporter=html --reporter=json-summary --reporter=text mocha --reporter mocha-json --require ts-node/register test/unit/**/*.spec.ts test/unit/*.spec.ts > test.json
-          echo "passed=$(jq '.numPassedTests' test.json)" >> $GITHUB_OUTPUT
-          echo "failed=$(jq '.numFailedTests' test.json)" >> $GITHUB_OUTPUT
-          echo "total=$(jq '.numTotalTests' test.json)" >> $GITHUB_OUTPUT
+          cd blackduck-security-task
+          npm run test
           echo "lines=$(jq '.total.lines.pct' coverage/coverage-summary.json)" >> $GITHUB_OUTPUT
+          TEST_SUMMARY=$(npm run test | tee /dev/tty | tail -n 10)
+          PASSED=$(echo "$TEST_SUMMARY" | grep -oP '\d+(?= passing)')
+          FAILED=$(echo "$TEST_SUMMARY" | grep -oP '\d+(?= failing)')
+          TOTAL=$((PASSED + FAILED))
+      
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
 
       - name: Comment results on PR
         run: |
