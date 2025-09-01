@@ -34,7 +34,7 @@ jobs:
       - name: Run tests and collect results
         id: results
         run: |
-          cd blackduck-security-task
+          cd blackduck-security-task && npm install --no-save mocha-json
           npx nyc --reporter=html --reporter=json-summary --reporter=text mocha --reporter mocha-json --require ts-node/register test/unit/**/*.spec.ts test/unit/*.spec.ts > test.json
           echo "passed=$(jq '.numPassedTests' test.json)" >> $GITHUB_OUTPUT
           echo "failed=$(jq '.numFailedTests' test.json)" >> $GITHUB_OUTPUT
