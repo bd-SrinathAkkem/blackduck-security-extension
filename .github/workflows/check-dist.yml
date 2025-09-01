@@ -35,14 +35,14 @@ jobs:
         id: results
         run: |
           cd blackduck-security-task
-          npx mocha --reporter=html --reporter=json-summary-reporter \
-            --require ts-node/register \
-            "test/unit/**/*.spec.ts" "test/unit/.spec.ts"
+          npx nyc --reporter=json-summary mocha --reporter json \
+            --require ts-node/register "test/unit/**/*.spec.ts" > test.json
        
-          echo "passed=$(jq '.stats.passes' test.json)" >> $GITHUB_OUTPUT
-          echo "failed=$(jq '.stats.failures' test.json)" >> $GITHUB_OUTPUT
-          echo "total=$(jq '.stats.tests' test.json)" >> $GITHUB_OUTPUT
-          echo "lines=$(jq '.total.lines.pct' coverage/coverage-summary.json)" >> $GITHUB_OUTPUT
+          for key in passes failures tests; do
+            echo "${key}=$(jq -r ".stats.$key" test.json)" >> $GITHUB_OUTPUT
+          done
+       
+          echo "lines=$(jq -r '.total.lines.pct' coverage/coverage-summary.json)" >> $GITHUB_OUTPUT
     
       - name: Comment results on PR
         run: |
